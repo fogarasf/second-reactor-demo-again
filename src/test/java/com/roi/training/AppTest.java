@@ -2,9 +2,11 @@ package com.roi.training;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
@@ -12,6 +14,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -85,5 +88,25 @@ public class AppTest {
                 () -> {
                     System.out.println("Stream completed");
                 });
+    }
+
+    @Test
+    public void testDisposable() {
+        Flux<Integer> numberSeq =
+                Flux.range(1,20).delayElements(Duration.ofSeconds(3));
+        Disposable cancelRef =
+                numberSeq.subscribe( e -> System.out.printf("Value received %s%n",e),
+                        error -> System.err.println("Error Published:: " + error),
+                        () -> System.out.println("Complete event published"));
+        Runnable runnableTask = () -> {
+            try {
+                TimeUnit.SECONDS.sleep(12);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Canceling subscription");
+            cancelRef.dispose();
+        };
+        runnableTask.run();
     }
 }

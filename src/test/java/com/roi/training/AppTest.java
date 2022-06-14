@@ -78,12 +78,15 @@ public class AppTest {
 
     @Test
     public void publishWithError() {
-        Flux<Integer> numberSeq = Flux.range(1,20)
-                .map( e -> {
-                    if (e== 8) {throw new RuntimeException("error on the eights");}
-                    return e;});
+        Flux<Integer> numberSeq = Flux.range(1, 20)
+                .map(e -> {
+                    if (e == 28) {
+                        throw new RuntimeException("error on the eights");
+                    }
+                    return e;
+                });
         numberSeq.subscribe(
-                e -> System.out.printf("Value received %s%n",e),
+                e -> System.out.printf("Value received %s%n", e),
                 error -> System.err.println("Error Published:: " + error),
                 () -> {
                     System.out.println("Stream completed");
@@ -108,5 +111,26 @@ public class AppTest {
             cancelRef.dispose();
         };
         runnableTask.run();
+    }
+
+    @Test
+    public void basicTest() {
+        StepVerifier.create(this.dataSrc)
+                .expectNext(this.dataValues.get(0))
+                .expectNext(this.dataValues.get(1))
+                .expectNext(this.dataValues.get(2))
+                .expectNext(this.dataValues.get(3))
+                .expectNext(this.dataValues.get(4), this.dataValues.get(5))
+                .expectNext(this.dataValues.get(6))
+                .expectNext(this.dataValues.get(7))
+                .expectNext(this.dataValues.get(8))
+                .verifyComplete();
+    }
+
+    @Test
+    public void testCount() {
+        StepVerifier.create(this.dataSrc)
+                .expectNextCount(this.ctr)
+                .verifyComplete();
     }
 }

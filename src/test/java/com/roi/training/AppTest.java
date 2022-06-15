@@ -204,13 +204,16 @@ public class AppTest {
 
     @Test
     public void publishElastic() {
-        Flux<UUID> pub = Flux.fromStream(Stream.generate(UUID::randomUUID).limit(100))
+        Flux<UUID> pub = Flux.fromStream(Stream.generate(UUID::randomUUID).limit(100000))
                 .publishOn(Schedulers.boundedElastic())
                 .map(u -> {
-                    System.out.println("Test");
+                    System.out.println(Thread.currentThread().getName());
                     return u;
                 });
 
+        pub.subscribe(System.out::println);
+        pub.subscribe(System.out::println);
+        pub.subscribe(System.out::println);
         pub.subscribe(System.out::println);
 
     }
@@ -248,7 +251,7 @@ public class AppTest {
 
     private Publisher<Integer> callSkuService(Integer sku) {
         if (sku>12347) {
-            throw new NullPointerException("ABC");
+            throw new IllegalArgumentException("ABC");
         }
         return Mono.just(1);
     }
